@@ -1,0 +1,14 @@
+{
+    "name": "cloudship",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Containerized cloud deployment automation",
+    "main": "src/server.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "test": "node --test"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}
