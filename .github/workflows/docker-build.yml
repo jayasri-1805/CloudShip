@@ -37,6 +37,17 @@ jobs:
       - name: Build Docker image
         run: docker build -t cloudship:test .
 
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@0.36.0
+        with:
+          image-ref: cloudship:test
+          scan-type: image
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
+
+
       - name: Run container
         run: docker run -d --name cloudship-test -p 3000:3000 cloudship:test
 
