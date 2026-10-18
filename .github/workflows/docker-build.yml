@@ -1,3 +1,4 @@
+
 name: CloudShip Docker CI
 
 on:
@@ -12,6 +13,11 @@ permissions:
 jobs:
   docker-build-and-test:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -33,6 +39,23 @@ jobs:
           docker logs cloudship-test
           exit 1
 
-      - name: Stop container
+      - name: Stop test container
         if: always()
         run: docker rm -f cloudship-test || true
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          IMAGE_ID="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker tag cloudship:test "$IMAGE_ID:latest"
+          docker tag cloudship:test "$IMAGE_ID:${GITHUB_SHA::7}"
+          docker push "$IMAGE_ID:latest"
+          docker push "$IMAGE_ID:${GITHUB_SHA::7}"
