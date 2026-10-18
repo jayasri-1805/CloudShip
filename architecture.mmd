@@ -1,0 +1,23 @@
+flowchart TD
+    A[Developer pushes to main] --> B[GitHub repository]
+    B --> C[GitHub Actions: Docker CI]
+    C --> D[Checkout source]
+    D --> E[Set up Node.js 22]
+    E --> F[npm ci]
+    F --> G[npm audit]
+    G --> H[Build Docker image]
+    H --> I[Trivy vulnerability scan]
+    I -->|No HIGH or CRITICAL findings| J[Run container]
+    J --> K[Health check: /health]
+    K -->|Healthy| L[GHCR login with GITHUB_TOKEN]
+    L --> M[Publish latest and short-SHA tags]
+    I -->|Finding or scanner failure| X[Fail job; do not publish]
+    K -->|Unhealthy| X
+
+    B --> N[Jenkins CI]
+    N --> O[Verify Node.js and npm]
+    O --> P[Install dependencies]
+    P --> Q[npm test]
+
+    R[Pull request targeting main] --> S[Dependency Review workflow]
+    S --> T[Review dependency changes]
